@@ -14,7 +14,7 @@ from PyQt5.QtGui import QFont, QColor, QPixmap, QImage
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QErrorMessage, QFrame, QVBoxLayout, 
     QHBoxLayout, QLineEdit, QPushButton, QLabel, QScrollArea, QMessageBox,
-    QFileDialog
+    QFileDialog, QTextEdit, QTextBrowser
 )
 
 import sys

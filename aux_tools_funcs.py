@@ -16,42 +16,69 @@ def search_docx_online(query):
     return docx_urls
 
 # DESCARGAR DOCX
-def descargar_docx(docx_url, nombre_archivo):
-    # Abre un cuadro de diálogo para que el usuario elija dónde guardar el archivo
+def descargar_docx(docx_url, nombre_archivo, parent=None):
+    
+    # Diálogo para guardar archivo
     ruta_archivo, _ = libs.QFileDialog.getSaveFileName(
-        None,  # Ventana principal
-        "Guardar Docx",  # Título del diálogo
-        nombre_archivo,  # Nombre predeterminado del archivo
-        "Archivos Docx (*.docx)"  # Filtro de tipo de archivo
+        parent,  # Usar parent en lugar de None
+        "Guardar Documento Word",
+        nombre_archivo,
+        "Archivos Word (*.docx);;Todos los archivos (*)"
     )
     
-    if ruta_archivo:  # Si el usuario seleccionó una ruta
-        # Descargar el archivo PDF
-        try:
-            response = libs.requests.get(docx_url)
-            
-            if response.status_code == 200:
-                # Guardar el archivo descargado en la ubicación seleccionada
-                with open(ruta_archivo, 'wb') as f:
-                    f.write(response.content)
-                print(f"Docx descargado correctamente en: {ruta_archivo}")
+    if not ruta_archivo:  # Usuario canceló
+        print("Descarga cancelada por el usuario")
+        return -2
 
-                # Mensaje de descarga completa
-                aviso = libs.QMessageBox(libs.QMessageBox.Information, "DESCARGA COMPLETADA", f"Archivo Guardado con éxito.\nRuta: {ruta_archivo}")
+    try:
+        # Descargar el archivo
+        response = libs.requests.get(docx_url, timeout=30)
+        response.raise_for_status()  # Lanza excepción para códigos 4XX/5XX
 
-                respuesta = aviso.exec_()
-                if respuesta == libs.QMessageBox.Save:
-                    print("Guardando...")
-                elif respuesta == libs.QMessageBox.Discard:
-                    print("Descartando cambios...")
+        # Guardar el archivo
+        with open(ruta_archivo, 'wb') as f:
+            f.write(response.content)
+        
+        print(f"Documento guardado en: {ruta_archivo}")
+        
+        # Mostrar mensaje de éxito (asegurando que se muestre)
+        msg = libs.QMessageBox(parent)
+        msg.setIcon(libs.QMessageBox.Information)
+        msg.setWindowTitle("DESCARGA EXITOSA")
+        msg.setText(f"Documento guardado correctamente")
+        msg.setInformativeText(f"Ubicación:\n{ruta_archivo}")
+        msg.setStandardButtons(libs.QMessageBox.Ok)
+        msg.exec_()  # Usar exec_() en lugar de show() para diálogo modal
+        
+        return 0
 
-            else:
-                print(f"Error al descargar el Docx: {response.status_code}")
-        except Exception as e:
-            print(f"Ocurrió un error: {e}")
-    else:
-        print("No se seleccionó ninguna ubicación para guardar el archivo.")
+    except libs.requests.RequestException as e:
+        print(f"Error de descarga: {str(e)}")
+        
+        # Mostrar mensaje de error detallado
+        error_msg = libs.QMessageBox(parent)
+        error_msg.setIcon(libs.QMessageBox.Critical)
+        error_msg.setWindowTitle("ERROR DE DESCARGA")
+        error_msg.setText("No se pudo descargar el documento")
+        error_msg.setInformativeText(f"Error: {str(e)}\nURL: {docx_url}")
+        error_msg.setDetailedText(f"Detalles técnicos:\n{str(e.__class__)}\n{str(e)}")
+        error_msg.setStandardButtons(libs.QMessageBox.Ok)
+        error_msg.exec_()
+        
+        return -1
 
+    except Exception as e:
+        print(f"Error inesperado: {str(e)}")
+        
+        error_msg = libs.QMessageBox(parent)
+        error_msg.setIcon(libs.QMessageBox.Critical)
+        error_msg.setWindowTitle("Error Inesperado")
+        error_msg.setText("Ocurrió un error inesperado")
+        error_msg.setInformativeText(str(e))
+        error_msg.exec_()
+        
+        return -1
+        
 # OBTENER MINIATURA DOCX
 """ Descarga un archivo DOCX desde una URL y genera una miniatura del contenido.
 Return: 
@@ -59,45 +86,39 @@ bytes: Imagen de la miniatura en formato PNG como bytes
 None: Si ocurre un error o el documento no tiene contenido visual """
 
 def get_docx_thumbnail(docx_url):
-    
     try:
-        # Descargar el archivo DOCX
+        # 1. Configurar fuente segura ANTES de crear la figura
+        libs.plt.rcParams['font.family'] = 'sans-serif'
+        libs.plt.rcParams['font.sans-serif'] = ['Arial', 'Helvetica', 'Verdana']  # Fuentes comunes
+        
+        # 2. Descargar y procesar el DOCX (tu código original)
         response = libs.requests.get(docx_url)
         response.raise_for_status()
+        doc = libs.Document(libs.BytesIO(response.content))
         
-        # Leer el documento DOCX
-        docx_file = libs.BytesIO(response.content)
-        doc = libs.Document(docx_file)
-        
-        # Crear una figura para la miniatura
-        libs.plt.figure(figsize=(8, 11))  # Tamaño carta vertical
+        # 3. Crear figura con contexto de fuente
+        fig = libs.plt.figure(figsize=(8, 11))
         libs.plt.axis('off')
-        libs.plt.title("Vista previa del documento", pad=20)
         
-        # Extraer texto para mostrar (primeras 200 palabras)
-        text = ""
-        for para in doc.paragraphs[:10]:  # Limitar a primeros 10 párrafos
-            text += para.text + "\n"
+        text = "\n".join(para.text for para in doc.paragraphs[:10]) or "[Documento vacío]"
         
-        if not text.strip():
-            text = "[Documento sin contenido de texto]"
+        # 4. Usar textwrap para mejor manejo de líneas
+        import textwrap
+        wrapped_text = textwrap.fill(text[:1000], width=80)
         
-        libs.plt.text(0.05, 0.95, text[:1000],  # Limitar a 1000 caracteres
-                ha='left', va='top', 
-                wrap=True, 
+        libs.plt.text(0.05, 0.95, wrapped_text, 
                 fontsize=10,
-                bbox=dict(facecolor='white', alpha=0.8))
+                wrap=True,
+                bbox={'facecolor': 'white', 'alpha': 0.8})
         
-        # Guardar la miniatura en un buffer de memoria
+        # 5. Guardar en buffer
         buf = libs.BytesIO()
         libs.plt.savefig(buf, format='png', dpi=50, bbox_inches='tight')
-        buf.seek(0)
-        libs.plt.close()
-        
-        return buf.read()
+        libs.plt.close(fig)
+        return buf.getvalue()
         
     except Exception as e:
-        print(f"Error al procesar el documento: {e}")
+        print(f"Error: {str(e)}")
         return None
 
 # --------------------------------------- #

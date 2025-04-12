@@ -49,7 +49,7 @@ def search_docx_worker(query):
     if query == "":
         label_current_state.setText("Inactivo")
         label_current_state.setStyleSheet("""
-            color: #d1a1d1;  /* Rosado claro */
+            color: #a8c6fa;  /* Azul claro */
             font: bold 12px Courier;
             border: none;
         """)
@@ -69,7 +69,6 @@ def search_docx_worker(query):
         is_in_searching = False
         return
 
-
     # --------------------------------------- #
     links = list(aux_tools_funcs.search_docx_online(query))  # Obtener resultados
 
@@ -85,7 +84,7 @@ def search_docx_worker(query):
     # Frame contenedor de los resultados
     results_container_frame = libs.QFrame()
     results_container_frame.setStyleSheet("""
-        background-color: #e5c0e3;  /* Rosado más claro */
+        background-color: #b8d4fd;  /* Azul más claro */
         border: 5px solid #9b4d96;  /* Morado oscuro */
         border-radius: 5px;
         border: none;
@@ -134,7 +133,7 @@ def search_docx_worker(query):
     # Luego de encontrar
     label_current_state.setText("Inactivo")
     label_current_state.setStyleSheet("""
-        color: #d1a1d1;  /* Rosado claro */
+        color: #a8c6fa;  /* Azul claro */
         font: bold 12px Courier;
         border: none;
     """)
@@ -156,8 +155,8 @@ def add_docx_to_list(docx_url, widget_cont):
         # Crear el contenedor del Docx
         frame_container_docx = libs.QFrame(widget_cont)
         frame_container_docx.setStyleSheet("""
-            background-color: #D1A1D1;
-            border: 2px solid #9b4d96;
+            background-color: #b8d4ff;
+            border: 2px solid #4a6da7;
             border-radius: 10px;
         """)
         frame_container_docx.setFixedSize(375, 200)
@@ -166,7 +165,7 @@ def add_docx_to_list(docx_url, widget_cont):
         # Contenedor para la imagen/miniatura
         frame_container_image_pixmap = libs.QFrame(frame_container_docx)
         frame_container_image_pixmap.setStyleSheet("""
-            background-color: #D1A1D1;
+            background-color: #b8d4ff;
             padding: 5px;
             border: none;
         """)
@@ -177,31 +176,32 @@ def add_docx_to_list(docx_url, widget_cont):
             # ------------------------------------------------ #
             # IMAGEN/ICONO DEL DOCX
             label_imagen_docx = libs.QLabel(frame_container_image_pixmap)
-            
-            """
-            # Obtener miniatura del documento Word
-            docx_icon_data = aux_tools_funcs.get_docx_thumbnail(docx_url)
+            label_imagen_docx.move(-10, 10)
 
-            if docx_icon_data is None:
-                # Usar icono por defecto si no se puede obtener miniatura
-                docx_icon = libs.QPixmap("word_icon.png")  # Asegúrate de tener este archivo
+            if toggle_search.text() == "ON":
+                docx_icon = libs.QPixmap("word_icon.png")  # Asignar icono word default
+
             else:
-                # Convertir los bytes a QPixmap
+                
+                # Obtener miniatura del documento Word
+                docx_icon_data = aux_tools_funcs.get_docx_thumbnail(docx_url)
                 docx_icon = libs.QPixmap()
                 docx_icon.loadFromData(docx_icon_data)
-            """
-            
-            docx_icon = libs.QPixmap("word_icon.png")  # Asignar icono word default
+
+                # Si en la búsqueda rápida desactivada no carga miniatura, pone el default igualmente
+                if docx_icon_data == None:
+                    docx_icon = libs.QPixmap("word_icon.png")
 
             # Redimensionar y mostrar
-            scaled_pixmap = docx_icon.scaled(150, 200, libs.Qt.KeepAspectRatio)
+            scaled_pixmap = docx_icon.scaled(160, 200, libs.Qt.KeepAspectRatio)
             label_imagen_docx.setPixmap(scaled_pixmap)
             
             # ------------------------------------------------ #
             # BOTONES
-            preview_button = libs.QPushButton("Previsualizar", frame_container_docx)
+            preview_button = libs.QPushButton("Previsualizar texto", frame_container_docx)
+
             preview_button.setStyleSheet("""
-                background-color: #9b4d96;
+                background-color: #1a3a6e;
                 color: white;
                 font: 12px 'Segoe UI';
                 padding: 10px;
@@ -212,12 +212,11 @@ def add_docx_to_list(docx_url, widget_cont):
             preview_button.setFixedHeight(35)
             preview_button.move(180, 70)
             
-            # Cambiar la función para previsualizar DOCX
             preview_button.clicked.connect(lambda: load_docx_from_url(docx_url, preview_frame))
             
             download_button = libs.QPushButton("Descargar", frame_container_docx)
             download_button.setStyleSheet("""
-                background-color: #9b4d96;
+                background-color: #1a3a6e;
                 color: white;
                 font: 12px 'Segoe UI';
                 padding: 10px;
@@ -228,8 +227,11 @@ def add_docx_to_list(docx_url, widget_cont):
             download_button.setFixedHeight(35)
             download_button.move(180, 115)
             
-            # Cambiar la función para descargar DOCX
             download_button.clicked.connect(lambda: aux_tools_funcs.descargar_docx(docx_url, docx_url.split("/")[-1]))
+
+            # Animar hover de los botones descargar y previsualizar
+            aux_tools_funcs.animate_hover(preview_button, (26, 58, 110), (120, 170, 255), 150)  # Azul medio
+            aux_tools_funcs.animate_hover(download_button, (26, 58, 110), (120, 170, 255), 150)  # Azul medio
             
             # ------------------------------------------------ #
             # NOMBRE DEL DOCUMENTO
@@ -237,8 +239,8 @@ def add_docx_to_list(docx_url, widget_cont):
             label_docx_name = libs.QLabel(f"{docx_name[:22]}...{docx_name[-5:]}" if len(docx_name) > 22 else docx_name, 
                                        frame_container_docx)
             label_docx_name.setStyleSheet("""
-                background-color: #e5c0e3;
-                color: #9b4d96;
+                background-color: #d4e3ff;
+                color: #2a4a7a;
                 font: bold 12px 'Segoe UI';
                 padding: 5px;
                 border: none;
@@ -248,14 +250,6 @@ def add_docx_to_list(docx_url, widget_cont):
             label_docx_name.setFixedHeight(35)
             label_docx_name.adjustSize()
             label_docx_name.move(180, 25)
-
-            # Añadir información adicional (opcional)
-            label_info = libs.QLabel("Documento Word", frame_container_docx)
-            label_info.setStyleSheet("""
-                color: #9b4d96;
-                font: 10px 'Segoe UI';
-            """)
-            label_info.move(180, 160)
 
         except Exception as ex: 
             aux_tools_funcs.destroy_frame(frame_container_docx)
@@ -275,120 +269,162 @@ def add_docx_to_list(docx_url, widget_cont):
         libs.QApplication.processEvents()
 
 # ------------------------------------------------ #
-# Preview del PDF
+# Preview del texto del Docx
+def load_docx_from_url(docx_url, frame):
+    global current_page, docx_document, preview_label, preview_frame
 
-def load_pdf_from_url(pdf_url, frame):
-    global current_page, pdf_document, preview_label, preview_frame
+    # Inicializar variables
+    docx_document = None
+    preview_label = None
 
     aux_tools_funcs.clear_frame(frame)
 
-    # Función interna para mostrar una página específica
-    def show_page(page_number):
-        global current_page, pdf_document, preview_label
+    # Función interna para mostrar el contenido del DOCX
+    def show_docx_content():
+        global docx_document, preview_label
 
-        if pdf_document is None or page_number < 0 or page_number >= len(pdf_document):
+        if docx_document is None:
             return
 
-        current_page = page_number
+        try:
+            # Crear un widget QTextEdit con diseño moderno
+            text_edit = libs.QTextEdit(frame)
+            text_edit.setReadOnly(True)
+            text_edit.setFrameShape(libs.QFrame.NoFrame)
+            
+            # Paleta de colores azulados modernos
+            background_color = "#f5f9ff"  # Azul muy claro
+            border_color = "#4a89dc"      # Azul brillante
+            text_color = "#2c3e50"        # Azul oscuro (texto)
+            accent_color = "#5d9cec"      # Azul intermedio
+            
+            # Extraer y formatear el contenido
+            html_content = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: 'Segoe UI', sans-serif;
+                        color: %s;
+                        line-height: 1.6;
+                        padding: 15px;
+                        background-color: %s;
+                    }
+                    h1, h2, h3 {
+                        color: %s;
+                        margin-top: 20px;
+                        margin-bottom: 10px;
+                    }
+                    p {
+                        margin-bottom: 15px;
+                    }
+                    .highlight {
+                        background-color: rgba(74, 137, 220, 0.1);
+                        padding: 2px 5px;
+                        border-radius: 3px;
+                    }
+                </style>
+            </head>
+            <body>
+            """ % (text_color, background_color, accent_color)
+            
+            # Procesar los párrafos con formato básico
+            for para in docx_document.paragraphs:
+                if para.style.name.startswith('Heading'):
+                    level = min(int(para.style.name.split()[-1]), 3)
+                    html_content += f"<h{level}>{para.text}</h{level}>"
+                else:
+                    if para.text.strip():  # Solo añadir párrafos no vacíos
+                        html_content += f"<p>{para.text}</p>"
+            
+            html_content += "</body></html>"
+            
+            # Aplicar el estilo moderno
+            text_edit.setHtml(html_content)
+            text_edit.setStyleSheet("""
+                QTextEdit {
+                    background-color: %s;
+                    border: 2px solid %s;
+                    border-radius: 8px;
+                    padding: 0px;
+                    margin: 10px;
+                }
+                QScrollBar:vertical {
+                    border: none;
+                    background: #e1e9f7;
+                    width: 10px;
+                    margin: 0px;
+                }
+                QScrollBar::handle:vertical {
+                    background: %s;
+                    min-height: 20px;
+                    border-radius: 4px;
+                }
+            """ % (background_color, border_color, accent_color))
+            
+            # Configuración adicional
+            text_edit.setAutoFormatting(libs.QTextEdit.AutoAll)
+            text_edit.setLineWrapMode(libs.QTextEdit.WidgetWidth)
+            
+            # Añadir al frame
+            if preview_label is not None:
+                preview_label.deleteLater()
+                
+            preview_label = text_edit
+            frame.layout().addWidget(text_edit)
 
-        # Cargar la página específica
-        page = pdf_document.load_page(current_page)
-        pix = page.get_pixmap()  # Obtener un pixmap (imagen) de la página
+        except Exception as e:
 
-        # Convertir el pixmap a un QImage
-        img = libs.QImage(pix.samples, pix.width, pix.height, pix.stride, libs.QImage.Format_RGB888)
-
-        # Convertir el QImage a un QPixmap
-        pixmap = libs.QPixmap.fromImage(img)
-
-        # Verificar si el QPixmap es válido
-        if pixmap.isNull():
-            raise Exception("No se pudo generar el QPixmap")
-
-        # Crear o actualizar el QLabel para mostrar el PDF
-        if preview_label is None:
-            preview_label = libs.QLabel(frame)
-            preview_label.setAlignment(libs.Qt.AlignCenter)
-            frame.layout().addWidget(preview_label)
-        preview_label.setPixmap(pixmap.scaled(frame.size(), libs.Qt.KeepAspectRatio))
-
-    # Función para ir a la página anterior
-    def previous_page():
-        global current_page
-        if current_page > 0:
-            show_page(current_page - 1)
-
-    # Función para ir a la página siguiente
-    def next_page():
-        global current_page
-        if pdf_document and current_page < len(pdf_document) - 1:
-            show_page(current_page + 1)
-
-    # Inicializar variables
-    current_page = 0
-    pdf_document = None
-    preview_label = None
+            print(f"Error al mostrar DOCX: {e}")
 
     try:
-        # Descargar el archivo PDF desde la URL
-        response = libs.requests.get(pdf_url)
-        response.raise_for_status()  # Verificar si la descarga fue exitosa
+        # Descargar el archivo DOCX desde la URL
+        response = libs.requests.get(docx_url)
+        response.raise_for_status()
 
-        # Abrir el archivo PDF desde los bytes descargados
-        pdf_document = libs.fitz.open(stream=libs.BytesIO(response.content))
+        # Abrir el documento Word desde los bytes descargados
+        docx_document = libs.Document(libs.BytesIO(response.content))
 
-        # Mostrar la primera página
-        show_page(current_page)
-
-        buttons_frame = libs.QFrame(frame)
-        buttons_frame.setStyleSheet("""
-            background-color: #d1a1d1;  /* Rosado claro */
-            border: 0px solid #9b4d96;  /* Morado oscuro */
-            border-radius: 10px;
-            border: none;
-
-        """)
-        buttons_frame.setFixedSize(530, 55)
-        buttons_frame.setLayout(libs.QHBoxLayout())
-
-        # ---------------------------------------- #
-        # Crear botones de navegación
-        btn_previous = libs.QPushButton("<<< Anterior", frame)
-        btn_previous.setStyleSheet("""
-            background-color: #9b4d96;  /* Morado oscuro */
-            color: white;
-            font: 12px 'Segoe UI';
-            padding: 10px;
-            border-radius: 10px;
-            border: none;
-        """)
-        btn_previous.setFixedWidth(200)
-        aux_tools_funcs.animate_hover(btn_previous, (155, 77, 150), (225, 120, 177), 150)
-        btn_previous.clicked.connect(previous_page)
-
-        btn_next = libs.QPushButton("Siguiente >>>", frame)
-        btn_next.setStyleSheet("""
-            background-color: #9b4d96;  /* Morado oscuro */
-            color: white;
-            font: 12px 'Segoe UI';
-            padding: 10px;
-            border-radius: 10px;
-            border: none;
-        """)
-        btn_next.setFixedWidth(200)
-        aux_tools_funcs.animate_hover(btn_next, (155, 77, 150), (225, 120, 177), 150)
-        btn_next.clicked.connect(next_page)
-
-        # Agregar los botones
-        buttons_frame.layout().addWidget(btn_previous)
-        buttons_frame.layout().addWidget(btn_next)
-
-        frame.layout().addWidget(buttons_frame)
+        # Mostrar el contenido
+        show_docx_content()
 
     except libs.requests.exceptions.RequestException as e:
-        print(f"Error al descargar el PDF: {e}")
+        error_label = libs.QLabel("No se pudo extraer el texto del Docx")
+        error_label.setAlignment(libs.Qt.AlignCenter)
+        error_label.setStyleSheet("""
+            QLabel {
+                background-color: #ffebee;  /* Rojo muy claro */
+                color: #c62828;            /* Rojo oscuro */
+                font-family: 'Segoe UI';
+                font-size: 18px;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #ef9a9a; /* Borde rojo claro */
+                margin: 10px;
+            }
+        """)
+        error_label.setWordWrap(True)
+        frame.layout().addWidget(error_label)
+
     except Exception as e:
-        print(f"Error al procesar el PDF: {e}")
+        error_label = libs.QLabel("No se pudo extraer el texto del Docx")
+        error_label.setAlignment(libs.Qt.AlignCenter)
+        error_label.setStyleSheet("""
+            QLabel {
+                background-color: #ffebee;  /* Rojo muy claro */
+                color: #c62828;            /* Rojo oscuro */
+                font-family: 'Segoe UI';
+                font-size: 18px;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #ef9a9a; /* Borde rojo claro */
+                margin: 10px;
+            }
+        """)
+        error_label.setWordWrap(True)
+        frame.layout().addWidget(error_label)
+        print(f"Error al procesar el DOCX: {e}")
 
 # --------------------------------------- #
 # AL CERRAR
@@ -530,7 +566,41 @@ search_button.setStyleSheet("""
     border: none;
 """)
 search_button.setFixedWidth(200)
-search_button.move(50, 100)
+search_button.move(20, 100)
+
+# ------------------------------------------- #
+# TOGGLE BUTTON (Nuevo - junto al botón de búsqueda)
+toggle_search = libs.QPushButton("OFF", search_frame)
+toggle_search.setCheckable(True)
+toggle_search.setStyleSheet("""
+    QPushButton {
+        background-color: #cccccc;
+        color: #333333;
+        font: bold 10px 'Segoe UI';
+        padding: 5px;
+        border-radius: 15px;
+        border: 2px solid #1a3a6e;
+    }
+    QPushButton:checked {
+        background-color: #4a6da7;
+        color: white;
+    }
+    QToolTip {
+        background-color: #2a4a7a;  /* Fondo azul oscuro */
+        color: white;             /* Texto blanco */
+        border: 0px solid #4a6da7;
+        border-radius: 4px;
+        padding: 3px;
+        font: 12px 'Segoe UI';
+    }
+""")
+toggle_search.setFixedWidth(65)
+toggle_search.setFixedHeight(31)
+toggle_search.move(235, 102)  # Posicionado junto al botón de búsqueda
+toggle_search.setToolTip("Modo de búsqueda rápida")
+
+# Cambiar texto ON/OFF dinámicamente
+toggle_search.toggled.connect(lambda state: toggle_search.setText("ON" if state else "OFF"))
 
 # --------------------------------------------------------------- #
 # Crear barra de título personalizada con botones de minimizar y cerrar
