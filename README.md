@@ -11,4 +11,4 @@ Mamoi Docx is a desktop application that allows you to search for docx files on 
 - **User-friendly Interface**: The interface is simple and intuitive, making the program easy to use.
 
 ## Releases
-- [Version 1.0](https://github.com/xHellish/Mamoi-PDF/releases/download/v2.0.0/Mamoi-PDF_v2.0.exe) (Last Update)
+- [Version 1.0](https://github.com/xHellish/Mamoi-Docx/releases/download/v1.0.0/Mamoi-DOCX_v1.0.exe) (Last Update)
