@@ -179,10 +179,9 @@ def add_docx_to_list(docx_url, widget_cont):
             label_imagen_docx.move(-10, 10)
 
             if toggle_search.text() == "ON":
-                docx_icon = libs.QPixmap("word_icon.png")  # Asignar icono word default
+                docx_icon = libs.QPixmap(aux_tools_funcs.resource_path("word_icon.png"))  # Asignar icono word default
 
             else:
-                
                 # Obtener miniatura del documento Word
                 docx_icon_data = aux_tools_funcs.get_docx_thumbnail(docx_url)
                 docx_icon = libs.QPixmap()
@@ -190,7 +189,7 @@ def add_docx_to_list(docx_url, widget_cont):
 
                 # Si en la búsqueda rápida desactivada no carga miniatura, pone el default igualmente
                 if docx_icon_data == None:
-                    docx_icon = libs.QPixmap("word_icon.png")
+                    docx_icon = libs.QPixmap(aux_tools_funcs.resource_path("word_icon.png"))
 
             # Redimensionar y mostrar
             scaled_pixmap = docx_icon.scaled(160, 200, libs.Qt.KeepAspectRatio)
@@ -438,7 +437,7 @@ app = libs.QApplication(libs.sys.argv)
 # Crear la ventana principal
 root = libs.QWidget()
 root.setWindowTitle("MAMOI DOCx")
-root.setWindowIcon(libs.QtGui.QIcon("mmoi_pdf.ico"))
+root.setWindowIcon(libs.QtGui.QIcon(aux_tools_funcs.resource_path("mamoi_docx.ico")))
 root.setGeometry(100, 100, 1280, 720)  # Establecer el tamaño de la ventana
 root.setStyleSheet("""
     background-color: #1a3a6e;  /* Azul oscuro */
@@ -678,3 +677,4 @@ root.show()
 
 # Ejecutar la aplicación
 libs.sys.exit(app.exec_())
+
